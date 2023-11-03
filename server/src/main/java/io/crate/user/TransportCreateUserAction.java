@@ -103,6 +103,7 @@ public class TransportCreateUserAction extends TransportMasterNodeAction<CreateU
      */
     @VisibleForTesting
     static boolean putUser(Metadata.Builder mdBuilder, String name, @Nullable SecureHash secureHash) {
+        // TODO THIS IS IT
         UsersMetadata oldMetadata = (UsersMetadata) mdBuilder.getCustom(UsersMetadata.TYPE);
         if (oldMetadata != null && oldMetadata.contains(name)) {
             return true;

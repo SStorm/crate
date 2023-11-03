@@ -40,6 +40,7 @@ public class SysUsersTableInfo {
             .add("name", STRING, User::name)
             .add("superuser", BOOLEAN, User::isSuperUser)
             .add("password", STRING, x -> x.password() == null ? null : PASSWORD_PLACEHOLDER)
+            .add("jwk_url", STRING, User::jwkUrl)
             .setPrimaryKeys(new ColumnIdent("name"))
             .build();
     }

@@ -54,6 +54,7 @@ public class CreateUserPlan implements Plan {
                               PlannerContext plannerContext,
                               RowConsumer consumer,
                               Row params, SubQueryResults subQueryResults) throws Exception {
+        // TODO RS: Handle JWT here
         SecureHash newPassword = UserActions.generateSecureHash(
             createUser.properties(),
             params,

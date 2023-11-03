@@ -27,6 +27,7 @@ import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 
 import java.io.IOException;
+import java.util.List;
 
 public class CreateUserRequest extends AcknowledgedRequest<CreateUserRequest> {
 
@@ -34,9 +35,34 @@ public class CreateUserRequest extends AcknowledgedRequest<CreateUserRequest> {
     @Nullable
     private final SecureHash secureHash;
 
+    @Nullable
+    private final String jwkUrl;
+    @Nullable
+    private final List<String> requiredClaims;
+
     public CreateUserRequest(String userName, @Nullable SecureHash attributes) {
+        this(userName, attributes, null, null);
+    }
+
+    public CreateUserRequest(String userName, @Nullable SecureHash attributes, @Nullable String jwkUrl, @Nullable List<String> requiredClaims) {
         this.userName = userName;
         this.secureHash = attributes;
+        this.jwkUrl = jwkUrl;
+        this.requiredClaims = requiredClaims;
+    }
+
+    public CreateUserRequest(StreamInput in) throws IOException {
+        super(in);
+        userName = in.readString();
+        secureHash = in.readOptionalWriteable(SecureHash::readFrom);
+        // TODO RS: Version check here
+        jwkUrl = in.readOptionalString();
+        var claims = in.readOptionalStringArray();
+        if (claims != null) {
+            requiredClaims = List.of(claims);
+        } else {
+            requiredClaims = null;
+        }
     }
 
     public String userName() {
@@ -48,16 +74,13 @@ public class CreateUserRequest extends AcknowledgedRequest<CreateUserRequest> {
         return secureHash;
     }
 
-    public CreateUserRequest(StreamInput in) throws IOException {
-        super(in);
-        userName = in.readString();
-        secureHash = in.readOptionalWriteable(SecureHash::readFrom);
-    }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         super.writeTo(out);
         out.writeString(userName);
         out.writeOptionalWriteable(secureHash);
+        out.writeOptionalString(jwkUrl);
+        out.writeOptionalStringArray(requiredClaims != null ? requiredClaims.toArray(new String[0]) : null);
     }
 }

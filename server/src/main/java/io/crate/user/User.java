@@ -44,11 +44,17 @@ public class User {
     @Nullable
     private final SecureHash password;
 
+    @Nullable
+    private final String jwkUrl;
+
+    // TODO RS: Claims
+
     public User(String name, Set<Role> roles, Set<Privilege> privileges, @Nullable SecureHash password) {
         this.roles = roles;
         this.name = name;
         this.privileges = new UserPrivileges(privileges);
         this.password = password;
+        this.jwkUrl = null;
     }
 
     public static User of(String name) {
@@ -79,6 +85,10 @@ public class User {
 
     public Iterable<Privilege> privileges() {
         return privileges;
+    }
+
+    public String jwkUrl() {
+        return jwkUrl;
     }
 
     /**

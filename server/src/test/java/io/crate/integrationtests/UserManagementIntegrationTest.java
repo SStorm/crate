@@ -70,11 +70,13 @@ public class UserManagementIntegrationTest extends BaseUsersIntegrationTest {
     @Test
     public void testSysUsersTableColumns() throws Exception {
         // The sys users table contains two columns, name and superuser
-        executeAsSuperuser("select column_name, data_type from information_schema.columns where table_name='users' and table_schema='sys'");
+        executeAsSuperuser("select column_name, data_type from information_schema.columns where table_name='users' and table_schema='sys' order by column_name");
         assertThat(response).hasRows(
+                "jwk_url| text",
                 "name| text",
                 "password| text",
-                "superuser| boolean");
+                "superuser| boolean"
+        );
     }
 
     @Test
@@ -96,6 +98,8 @@ public class UserManagementIntegrationTest extends BaseUsersIntegrationTest {
                 "arthur| NULL| false",
                 "ford| ********| false");
     }
+
+    // TODO RS: JWT IT
 
     @Test
     public void testCreateUserWithPasswordExpression() throws Exception {
