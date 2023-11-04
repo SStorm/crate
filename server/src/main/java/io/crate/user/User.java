@@ -47,14 +47,20 @@ public class User {
     @Nullable
     private final String jwkUrl;
 
-    // TODO RS: Claims
+    @Nullable
+    private final Set<String> requiredClaims;
 
     public User(String name, Set<Role> roles, Set<Privilege> privileges, @Nullable SecureHash password) {
+        this(name, roles, privileges, password, null, null);
+    }
+
+    public User(String name, Set<Role> roles, Set<Privilege> privileges, @Nullable SecureHash password, @Nullable String jwkUrl, @Nullable Set<String> requiredClaims) {
         this.roles = roles;
         this.name = name;
         this.privileges = new UserPrivileges(privileges);
         this.password = password;
-        this.jwkUrl = null;
+        this.jwkUrl = jwkUrl;
+        this.requiredClaims = requiredClaims;
     }
 
     public static User of(String name) {
@@ -63,6 +69,10 @@ public class User {
 
     public static User of(String name, @Nullable Set<Privilege> privileges, SecureHash password) {
         return new User(name, Set.of(), privileges == null ? Set.of() : privileges, password);
+    }
+
+    public static User of(String name, @Nullable Set<Privilege> privileges, SecureHash password, String jwkUrl, Set<String> requiredClaims) {
+        return new User(name, Set.of(), privileges == null ? Set.of() : privileges, password, jwkUrl, requiredClaims);
     }
 
     @VisibleForTesting
@@ -89,6 +99,10 @@ public class User {
 
     public String jwkUrl() {
         return jwkUrl;
+    }
+
+    public Set<String> requiredClaims() {
+        return requiredClaims;
     }
 
     /**

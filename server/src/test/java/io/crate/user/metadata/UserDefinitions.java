@@ -33,13 +33,13 @@ import io.crate.user.SecureHash;
 
 public final class UserDefinitions {
 
-    public static final Map<String, SecureHash> SINGLE_USER_ONLY = Collections.singletonMap("Arthur", null);
+    public static final Map<String, UsersMetadata.UserProperties> SINGLE_USER_ONLY = Collections.singletonMap("Arthur", new UsersMetadata.UserProperties(null, null, null));
 
-    public static final Map<String, SecureHash> DUMMY_USERS = Map.of(
+    public static final Map<String, UsersMetadata.UserProperties> DUMMY_USERS = Map.of(
         "Ford",
-        getSecureHash("fords-password"),
+        new UsersMetadata.UserProperties(getSecureHash("fords-password"), null, null),
         "Arthur",
-        getSecureHash("arthurs-password")
+        new UsersMetadata.UserProperties(getSecureHash("arthurs-password"), null, null)
     );
 
     private static SecureHash getSecureHash(String password) {

@@ -73,9 +73,9 @@ public class UserLookupService implements UserLookup, ClusterStateListener {
         HashSet<User> users = new HashSet<>();
         users.add(User.CRATE_USER);
         if (metadata != null) {
-            for (Map.Entry<String, SecureHash> user: metadata.users().entrySet()) {
+            for (Map.Entry<String, UsersMetadata.UserProperties> user: metadata.users().entrySet()) {
                 String userName = user.getKey();
-                SecureHash password = user.getValue();
+                SecureHash password = user.getValue().password();
                 Set<Privilege> privileges = null;
                 if (privilegesMetadata != null) {
                     privileges = privilegesMetadata.getUserPrivileges(userName);

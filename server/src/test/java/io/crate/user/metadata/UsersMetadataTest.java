@@ -98,7 +98,7 @@ public class UsersMetadataTest extends ESTestCase {
             Strings.toString(builder));
         parser.nextToken(); // start object
         UsersMetadata users = UsersMetadata.fromXContent(parser);
-        assertThat(new UsersMetadata(expectedUsers)).isEqualTo(users);
+        assertThat(UsersMetadata.fromSecureHashMap(expectedUsers)).isEqualTo(users);
 
         // a metadata custom must consume the surrounded END_OBJECT token, no token must be left
         assertThat(parser.nextToken()).isNull();

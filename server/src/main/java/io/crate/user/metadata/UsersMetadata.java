@@ -39,18 +39,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implements Metadata.Custom {
 
     public static final String TYPE = "users";
 
-    private final Map<String, SecureHash> users;
+    public record UserProperties(SecureHash password, String jwkUrl, Set<String> requiredClaims) {}
+
+    // TODO RS: Needs refactor, also bwc
+    private final Map<String, UserProperties> users;
 
     public UsersMetadata() {
         this.users = new HashMap<>();
     }
 
-    public UsersMetadata(Map<String, SecureHash> users) {
+    // Here for backwards-compatibility
+    public UsersMetadata(Map<String, UserProperties> users) {
         this.users = users;
     }
 
@@ -61,12 +66,20 @@ public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implem
         return new UsersMetadata(new HashMap<>(instance.users));
     }
 
+    public static UsersMetadata fromSecureHashMap(Map<String, SecureHash> users) {
+        Map<String, UserProperties> res = new HashMap<>();
+        for (var entry : users.entrySet()) {
+            res.put(entry.getKey(), new UserProperties(entry.getValue(), null, null));
+        }
+        return new UsersMetadata(res);
+    }
+
     public boolean contains(String name) {
         return users.containsKey(name);
     }
 
     public void put(String name, @Nullable SecureHash secureHash) {
-        users.put(name, secureHash);
+        users.put(name, new UserProperties(secureHash, null, null));
     }
 
     public void remove(String name) {
@@ -77,7 +90,7 @@ public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implem
         return new ArrayList<>(users.keySet());
     }
 
-    public Map<String, SecureHash> users() {
+    public Map<String, UserProperties> users() {
         return users;
     }
 
@@ -87,26 +100,26 @@ public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implem
         for (int i = 0; i < numUsers; i++) {
             String userName = in.readString();
             SecureHash secureHash = in.readOptionalWriteable(SecureHash::readFrom);
-            users.put(userName, secureHash);
+            users.put(userName, new UserProperties(secureHash, null, null));
         }
     }
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
         out.writeVInt(users.size());
-        for (Map.Entry<String, SecureHash> user : users.entrySet()) {
+        for (var user : users.entrySet()) {
             out.writeString(user.getKey());
-            out.writeOptionalWriteable(user.getValue());
+            out.writeOptionalWriteable(user.getValue().password);
         }
     }
 
     @Override
     public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException {
         builder.startObject("users");
-        for (Map.Entry<String, SecureHash> entry : users.entrySet()) {
+        for (Map.Entry<String, UserProperties> entry : users.entrySet()) {
             builder.startObject(entry.getKey());
-            if (entry.getValue() != null) {
-                entry.getValue().toXContent(builder, params);
+            if (entry.getValue().password != null) {
+                entry.getValue().password.toXContent(builder, params);
             }
             builder.endObject();
         }
@@ -141,7 +154,7 @@ public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implem
      *
      */
     public static UsersMetadata fromXContent(XContentParser parser) throws IOException {
-        Map<String, SecureHash> users = new HashMap<>();
+        Map<String, UserProperties> users = new HashMap<>();
         XContentParser.Token token = parser.nextToken();
 
         if (token == XContentParser.Token.FIELD_NAME && parser.currentName().equals("users")) {
@@ -156,7 +169,7 @@ public class UsersMetadata extends AbstractNamedDiffable<Metadata.Custom> implem
                 while (parser.nextToken() == XContentParser.Token.FIELD_NAME) {
                     String userName = parser.currentName();
                     if (parser.nextToken() == XContentParser.Token.START_OBJECT) {
-                        users.put(userName, SecureHash.fromXContent(parser));
+                        users.put(userName, new UserProperties(SecureHash.fromXContent(parser), null, null));
                     }
                 }
             }
